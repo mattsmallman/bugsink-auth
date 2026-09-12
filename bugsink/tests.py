@@ -476,18 +476,16 @@ class ConfigurableRemoteUserMiddlewareTestCase(TransactionTestCase):
     # TransactionTestCase: the home view uses phonehome's durable_atomic, which can't nest in TestCase's transaction.
 
     def _enabled_settings(self):
+        from .settings.default import wire_remote_user_auth
+
         middleware = list(settings.MIDDLEWARE)
-        middleware.insert(
-            middleware.index("django.contrib.auth.middleware.AuthenticationMiddleware") + 1,
-            "bugsink.middleware.ConfigurableRemoteUserMiddleware",
-        )
+        authentication_backends = ["django.contrib.auth.backends.ModelBackend"]
+        wire_remote_user_auth(authentication_backends, middleware)
+
         return {
             "REMOTE_USER_HEADER": "HTTP_X_REMOTE_EMAIL",
             "MIDDLEWARE": middleware,
-            "AUTHENTICATION_BACKENDS": [
-                "bugsink.authentication.EmailRemoteUserBackend",
-                "django.contrib.auth.backends.ModelBackend",
-            ],
+            "AUTHENTICATION_BACKENDS": authentication_backends,
         }
 
     def test_header_present_matching_user_is_logged_in(self):
