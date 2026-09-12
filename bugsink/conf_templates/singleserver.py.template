@@ -23,12 +23,8 @@ USE_X_REAL_IP = True
 # USE_X_FORWARDED_FOR = True
 # X_FORWARDED_FOR_PROXY_COUNT = 1
 
-# Trusted-header ("SSO") login: if your reverse proxy authenticates users itself (Cloudflare Access, Authelia,
-# Authentik, oauth2-proxy, ...) and sets a header with the authenticated user's email, Bugsink can log that user in
-# automatically for a matching, pre-existing Bugsink account. Set this to the WSGI META-style name of that header
-# (uppercase, dashes replaced by underscores, prefixed with HTTP_). SECURITY: only enable this if Bugsink is
-# unreachable except via that proxy, and make sure the proxy strips/overwrites any client-supplied copy of the
-# header before setting its own value.
+# Trust a header set by your reverse proxy (Cloudflare Access, Authelia, ...) as the logged-in user's email.
+# SECURITY: only if Bugsink is unreachable except via that proxy, and the proxy overwrites the header itself.
 # REMOTE_USER_HEADER = "HTTP_CF_ACCESS_AUTHENTICATED_USER_EMAIL"
 
 

@@ -8,11 +8,7 @@ from bsmain.models import AuthToken
 
 
 class EmailRemoteUserBackend(RemoteUserBackend):
-    """
-    Used together with ConfigurableRemoteUserMiddleware (see bugsink/middleware.py) when REMOTE_USER_HEADER is set.
-    Looks up the header's value against User.USERNAME_FIELD, which for Bugsink is 'username' but always holds the
-    user's email address (see the "use email for usernames" logic in users/forms.py).
-    """
+    # No auto-create: the header must match an existing user's username (== email, see users/forms.py).
     create_unknown_user = False
 
 

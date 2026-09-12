@@ -216,11 +216,7 @@ def get_chosen_language(request_user, request):
 
 
 class ConfigurableRemoteUserMiddleware(RemoteUserMiddleware):
-    """
-    Django's RemoteUserMiddleware hard-codes 'REMOTE_USER' as the META key to trust. We read the key to trust from
-    the REMOTE_USER_HEADER setting instead, so a trusted reverse proxy's own header name can be used (see
-    REMOTE_USER_HEADER in bugsink/settings/default.py). Only added to MIDDLEWARE when that setting is non-empty.
-    """
+    # RemoteUserMiddleware hard-codes 'REMOTE_USER' as the META key; we read it from settings instead.
     @property
     def header(self):
         return settings.REMOTE_USER_HEADER

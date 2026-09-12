@@ -473,12 +473,7 @@ class EmailRemoteUserBackendTestCase(DjangoTestCase):
 
 
 class ConfigurableRemoteUserMiddlewareTestCase(TransactionTestCase):
-    # Integration-level tests for the REMOTE_USER_HEADER feature: MIDDLEWARE/AUTHENTICATION_BACKENDS are put together
-    # here the way bugsink/settings/default.py would put them together if REMOTE_USER_HEADER were set in the
-    # environment (which it is not, for the test-suite's settings).
-    #
-    # TransactionTestCase (not TestCase): the home view touches phonehome's durable_atomic, which cannot nest inside
-    # TestCase's own wrapping transaction.
+    # TransactionTestCase: the home view uses phonehome's durable_atomic, which can't nest in TestCase's transaction.
 
     def _enabled_settings(self):
         middleware = list(settings.MIDDLEWARE)
