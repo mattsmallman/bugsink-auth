@@ -162,6 +162,29 @@ MIDDLEWARE = [
     'bugsink.middleware.PerformanceStatsMiddleware',
 ]
 
+AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
+
+# Trusted-header ("remote user") authentication: if a trusted reverse proxy (Cloudflare Access, Authelia, Authentik,
+# oauth2-proxy, ...) sets a header with the authenticated user's email address, Bugsink can log that user in
+# automatically instead of showing its own login form. Set REMOTE_USER_HEADER to the WSGI META-style name of that
+# header, i.e. the header name uppercased with dashes replaced by underscores and prefixed with HTTP_, e.g.
+# "HTTP_CF_ACCESS_AUTHENTICATED_USER_EMAIL" for Cloudflare Access's Cf-Access-Authenticated-User-Email. Matches
+# healthchecks' setting of the same name: https://github.com/healthchecks/healthchecks
+#
+# SECURITY: only enable this when Bugsink is not reachable except through the trusted proxy, and make sure the proxy
+# strips/overwrites any client-supplied copy of the header before setting its own value.
+REMOTE_USER_HEADER = os.getenv("REMOTE_USER_HEADER", None)
+
+if REMOTE_USER_HEADER:
+    # Existing accounts only: unlike Django's/healthchecks' default, we don't auto-create users on first sight of the
+    # header, matching Bugsink's invite/registration-gated user model.
+    AUTHENTICATION_BACKENDS = ["bugsink.authentication.EmailRemoteUserBackend"] + AUTHENTICATION_BACKENDS
+
+    MIDDLEWARE.insert(
+        MIDDLEWARE.index("django.contrib.auth.middleware.AuthenticationMiddleware") + 1,
+        "bugsink.middleware.ConfigurableRemoteUserMiddleware",
+    )
+
 # Config of verbose_csrf_middleware.CsrfViewMiddleware: For Bugsink, there's never any intentional cross-scheme POSTing
 # going on. In that case "wrong scheme" always just means "Django's confused about is_secure", and we want to point
 # people in the right direction (i.e. fix your proxy's X-Forwarded-Proto)

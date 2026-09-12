@@ -1,9 +1,19 @@
+from django.contrib.auth.backends import RemoteUserBackend
 from django.contrib.auth.models import AnonymousUser
 from rest_framework.authentication import BaseAuthentication
 from rest_framework import exceptions
 from drf_spectacular.extensions import OpenApiAuthenticationExtension
 
 from bsmain.models import AuthToken
+
+
+class EmailRemoteUserBackend(RemoteUserBackend):
+    """
+    Used together with ConfigurableRemoteUserMiddleware (see bugsink/middleware.py) when REMOTE_USER_HEADER is set.
+    Looks up the header's value against User.USERNAME_FIELD, which for Bugsink is 'username' but always holds the
+    user's email address (see the "use email for usernames" logic in users/forms.py).
+    """
+    create_unknown_user = False
 
 
 class BearerTokenAuthentication(BaseAuthentication):

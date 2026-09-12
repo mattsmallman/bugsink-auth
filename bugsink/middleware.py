@@ -2,6 +2,7 @@ import logging
 from time import time
 
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.middleware import RemoteUserMiddleware
 from django.db import connection
 from django.conf import settings
 from django.core.exceptions import SuspiciousOperation
@@ -212,6 +213,17 @@ def get_chosen_language(request_user, request):
     if request_user.is_authenticated and request_user.language != "auto":
         return get_supported_language_variant(request_user.language, strict=False)
     return language_from_accept_language(request)
+
+
+class ConfigurableRemoteUserMiddleware(RemoteUserMiddleware):
+    """
+    Django's RemoteUserMiddleware hard-codes 'REMOTE_USER' as the META key to trust. We read the key to trust from
+    the REMOTE_USER_HEADER setting instead, so a trusted reverse proxy's own header name can be used (see
+    REMOTE_USER_HEADER in bugsink/settings/default.py). Only added to MIDDLEWARE when that setting is non-empty.
+    """
+    @property
+    def header(self):
+        return settings.REMOTE_USER_HEADER
 
 
 class UserLanguageMiddleware:
